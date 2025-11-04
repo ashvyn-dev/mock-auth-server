@@ -1,0 +1,15 @@
+[project]
+name = "oauth-mock"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.120.1",
+    "pyjwt>=2.10.1",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+    "requests-oauthlib>=2.0.0",
+    "uvicorn>=0.38.0",
+]
