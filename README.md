@@ -1,13 +1,16 @@
 # OAuth Mock Server
 
-A complete mock OAuth1 and OAuth2 authorization server built with FastAPI for testing OAuth implementations.
+A complete mock OAuth1 and OAuth2 authorization server with dynamic Mock API support built with FastAPI for testing OAuth implementations and API integrations.
 
 ## Features
 
 - OAuth1.0a support (3-legged flow with HMAC-SHA1 signatures)
 - OAuth2 support (Authorization Code Grant flow with JWT tokens)
+- **Mock API with OpenAPI 3.0 specification support**
+- **Auto-generated fake data using Faker library**
+- **Custom response data override support**
 - YAML/JSON configuration
-- Modular design (separate OAuth1 and OAuth2 modules)
+- Modular design (separate OAuth1, OAuth2, and Mock API modules)
 - Protected resource endpoints
 - Mock user database
 - Built with uv for fast dependency management
@@ -38,6 +41,7 @@ server:
 enabled_flows:
   - "oauth1"
   - "oauth2"
+  - "mockapi"  # Enable Mock API feature
 
 jwt:
   secret: "mock-oauth-secret"
@@ -61,6 +65,12 @@ oauth2:
   redirect_uris:
     - "http://localhost:3000/callback"
     - "http://127.0.0.1:3000/callback"
+
+mockapi:
+  config_file: "mockapi-config.yaml"
+  prefix: "/mockapi"
+  auto_generate: true
+  faker_locale: "en_IN"
 
 users:
   user@example.com:
@@ -124,6 +134,149 @@ Access the server:
 - API Documentation: http://localhost:8000/docs
 - Root Endpoint: http://localhost:8000/
 - Health Check: http://localhost:8000/health
+
+## Mock API Feature
+
+The Mock API feature allows you to quickly create mock REST APIs based on OpenAPI 3.0 specifications. It automatically generates realistic fake data or uses your custom response data.
+
+### Setting Up Mock APIs
+
+1. **Enable Mock API** in `config.yaml`:
+```
+enabled_flows:
+  - "mockapi"
+
+mockapi:
+  config_file: "mockapi-config.yaml"  # Path to OpenAPI spec
+  prefix: "/mockapi"                   # URL prefix for endpoints
+  auto_generate: true                  # Auto-generate fake data
+  faker_locale: "en_IN"                # Locale for generated data
+```
+
+2. **Create OpenAPI Specification** (`mockapi-config.yaml`):
+```
+openapi: 3.0.3
+info:
+  title: My Mock API
+  version: 1.0.0
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+```
+
+3. **Add Custom Response Data** (optional):
+```
+x-custom-responses:
+  /users/me:
+    get:
+      id: 12345
+      email: "john.doe@example.com"
+      name: "John Doe"
+      role: "admin"
+```
+
+### Testing Mock APIs
+
+List all available endpoints:
+```
+curl http://localhost:8000/mockapi/list
+```
+
+Get OpenAPI specification:
+```
+curl http://localhost:8000/mockapi/openapi.json
+```
+
+Call mock endpoints:
+```
+# Auto-generated data
+curl http://localhost:8000/mockapi/users
+curl http://localhost:8000/mockapi/products
+curl http://localhost:8000/mockapi/orders
+
+# Custom response data
+curl http://localhost:8000/mockapi/users/me
+```
+
+### Mock API Features
+
+**Auto-Generated Data Types:**
+- Realistic emails, names, addresses
+- UUIDs, dates, timestamps
+- Numbers within specified ranges
+- Booleans, enums
+- Arrays and nested objects
+- Localized data (Indian names, addresses with `en_IN`)
+
+**Schema Support:**
+- All OpenAPI 3.0 data types
+- Schema references (`$ref`)
+- Required fields
+- Min/max constraints
+- Format specifications (email, uri, date, uuid)
+- Enum values
+- Examples
+
+**Custom Data Override:**
+Use `x-custom-responses` in your OpenAPI spec to provide specific response data instead of auto-generated data.
+
+### Example Mock API Endpoints
+
+Based on the included `mockapi-config.yaml`:
+
+**Users API:**
+```
+GET  /mockapi/users           # List all users
+POST /mockapi/users           # Create user
+GET  /mockapi/users/{userId}  # Get user by ID
+PUT  /mockapi/users/{userId}  # Update user
+DELETE /mockapi/users/{userId} # Delete user
+GET  /mockapi/users/me        # Get current user (custom data)
+```
+
+**Products API:**
+```
+GET  /mockapi/products        # List products (custom data)
+POST /mockapi/products        # Create product
+```
+
+**Orders API:**
+```
+GET  /mockapi/orders          # List orders
+POST /mockapi/orders          # Create order
+GET  /mockapi/orders/{orderId} # Get order by ID
+```
+
+**Analytics API:**
+```
+GET  /mockapi/analytics/stats # Get analytics data
+```
+
+All endpoints are automatically documented in Swagger UI at http://localhost:8000/docs
 
 ## Testing OAuth1
 
@@ -193,18 +346,24 @@ curl -X GET http://localhost:8000/oauth2/api/user \
 
 ## API Endpoints
 
-OAuth1 endpoints:
-- POST /oauth1/request_token - Get temporary credentials
-- GET /oauth1/authorize - User authorization page
-- POST /oauth1/authorize - Submit authorization
-- POST /oauth1/access_token - Exchange for access token
-- GET /oauth1/api/user - Access protected resource
+### OAuth1 Endpoints
+- `POST /oauth1/request_token` - Get temporary credentials
+- `GET /oauth1/authorize` - User authorization page
+- `POST /oauth1/authorize` - Submit authorization
+- `POST /oauth1/access_token` - Exchange for access token
+- `GET /oauth1/api/user` - Access protected resource
 
-OAuth2 endpoints:
-- GET /authorize - Authorization request
-- POST /authorize/login - Login and authorization
-- POST /token - Get tokens
-- GET /.well-known/oauth-authorization-server - Server metadata
+### OAuth2 Endpoints
+- `GET /authorize` - Authorization request
+- `POST /authorize/login` - Login and authorization
+- `POST /token` - Get tokens
+- `GET /.well-known/oauth-authorization-server` - Server metadata
+- `GET /oauth2/api/user` - Access protected resource
+
+### Mock API Endpoints
+- `GET /mockapi/list` - List all registered mock endpoints
+- `GET /mockapi/openapi.json` - Get OpenAPI specification
+- `GET|POST|PUT|PATCH|DELETE /mockapi/*` - Dynamic endpoints based on OpenAPI spec
 
 ## Test Credentials
 
@@ -230,19 +389,21 @@ Client Secret: my_app_client_secret
 
 ```
 oauth-mock-server/
-|-- app.py
-|-- config.yaml
-|-- pyproject.toml
-|-- uv.lock
-|-- .gitignore
-|-- README.md
-|-- oauth1_test.py
-|-- oauth1_signer.py
-`-- src/
-    |-- __init__.py
-    |-- config.py
-    |-- oauth1.py
-    `-- oauth2.py
+├── app.py
+├── config.yaml
+├── mockapi-config.yaml
+├── pyproject.toml
+├── uv.lock
+├── .gitignore
+├── README.md
+├── oauth1_test.py
+├── oauth1_signer.py
+└── src/
+    ├── __init__.py
+    ├── config.py
+    ├── oauth1.py
+    ├── oauth2.py
+    └── mockapi.py
 ```
 
 ## Troubleshooting
@@ -282,6 +443,19 @@ uv run app.py
 curl http://localhost:8000/health
 ```
 
+Mock API not loading:
+```
+# Check if mockapi is enabled in config.yaml
+enabled_flows:
+  - "mockapi"
+
+# Verify OpenAPI spec file exists
+ls -la mockapi-config.yaml
+
+# Check server logs for errors
+uv run app.py
+```
+
 ## Development
 
 Add new package:
@@ -309,3 +483,17 @@ Add new test user:
 2. Add user in users section
 3. Restart server
 
+Add new mock API endpoints:
+1. Edit mockapi-config.yaml
+2. Add paths and schemas to OpenAPI spec
+3. Optionally add custom responses in `x-custom-responses`
+4. Restart server (endpoints are auto-registered)
+
+## Dependencies
+
+- **FastAPI** - Modern web framework
+- **Uvicorn** - ASGI server
+- **PyJWT** - JWT token handling
+- **PyYAML** - YAML configuration
+- **Faker** - Fake data generation for Mock API
+- **Starlette** - ASGI toolkit

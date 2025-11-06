@@ -1,0 +1,516 @@
+openapi: 3.0.3
+info:
+  title: Mock API Server
+  description: |
+    A dynamic mock API server that generates realistic fake data.
+    You can define custom responses using `x-custom-responses` or let the system auto-generate data.
+  version: 1.0.0
+  contact:
+    name: Mock API Support
+    email: support@mockapi.local
+
+servers:
+  - url: http://localhost:8000/mockapi
+    description: Local development server
+
+# ============================================================================
+# Custom Response Data (Optional)
+# ============================================================================
+# Define custom responses here. If not defined, fake data will be auto-generated
+# x-custom-responses:
+#   /users/me:
+#     get:
+#       id: 12345
+#       email: "john.doe@example.com"
+#       name: "John Doe"
+#       role: "admin"
+#       created_at: "2024-01-15T10:30:00Z"
+
+#   /products:
+#     get:
+#       - id: 1
+#         name: "Laptop"
+#         price: 999.99
+#         in_stock: true
+#       - id: 2
+#         name: "Mouse"
+#         price: 29.99
+#         in_stock: true
+
+# # ============================================================================
+# # API Paths
+# # ============================================================================
+# paths:
+#   /users:
+#     get:
+#       summary: Get all users
+#       description: Returns a list of all users in the system
+#       operationId: getUsers
+#       tags:
+#         - Users
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 type: array
+#                 items:
+#                   $ref: '#/components/schemas/User'
+
+#     post:
+#       summary: Create a new user
+#       description: Create a new user in the system
+#       operationId: createUser
+#       tags:
+#         - Users
+#       requestBody:
+#         required: true
+#         content:
+#           application/json:
+#             schema:
+#               $ref: '#/components/schemas/UserInput'
+#       responses:
+#         '201':
+#           description: User created successfully
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/User'
+
+#   /users/{userId}:
+#     get:
+#       summary: Get user by ID
+#       description: Returns a single user by their ID
+#       operationId: getUserById
+#       tags:
+#         - Users
+#       parameters:
+#         - name: userId
+#           in: path
+#           required: true
+#           schema:
+#             type: integer
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/User'
+#         '404':
+#           description: User not found
+
+#     put:
+#       summary: Update user
+#       description: Update an existing user
+#       operationId: updateUser
+#       tags:
+#         - Users
+#       parameters:
+#         - name: userId
+#           in: path
+#           required: true
+#           schema:
+#             type: integer
+#       requestBody:
+#         required: true
+#         content:
+#           application/json:
+#             schema:
+#               $ref: '#/components/schemas/UserInput'
+#       responses:
+#         '200':
+#           description: User updated successfully
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/User'
+
+#     delete:
+#       summary: Delete user
+#       description: Delete a user from the system
+#       operationId: deleteUser
+#       tags:
+#         - Users
+#       parameters:
+#         - name: userId
+#           in: path
+#           required: true
+#           schema:
+#             type: integer
+#       responses:
+#         '204':
+#           description: User deleted successfully
+
+#   /users/me:
+#     get:
+#       summary: Get current user
+#       description: Returns the currently authenticated user (uses custom data)
+#       operationId: getCurrentUser
+#       tags:
+#         - Users
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/User'
+
+#   /products:
+#     get:
+#       summary: Get all products
+#       description: Returns a list of all products (uses custom data)
+#       operationId: getProducts
+#       tags:
+#         - Products
+#       parameters:
+#         - name: category
+#           in: query
+#           schema:
+#             type: string
+#         - name: limit
+#           in: query
+#           schema:
+#             type: integer
+#             default: 10
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 type: array
+#                 items:
+#                   $ref: '#/components/schemas/Product'
+
+#     post:
+#       summary: Create a new product
+#       description: Add a new product to the catalog
+#       operationId: createProduct
+#       tags:
+#         - Products
+#       requestBody:
+#         required: true
+#         content:
+#           application/json:
+#             schema:
+#               $ref: '#/components/schemas/ProductInput'
+#       responses:
+#         '201':
+#           description: Product created successfully
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/Product'
+
+#   /orders:
+#     get:
+#       summary: Get all orders
+#       description: Returns a list of all orders
+#       operationId: getOrders
+#       tags:
+#         - Orders
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 type: array
+#                 items:
+#                   $ref: '#/components/schemas/Order'
+
+#     post:
+#       summary: Create a new order
+#       description: Place a new order
+#       operationId: createOrder
+#       tags:
+#         - Orders
+#       requestBody:
+#         required: true
+#         content:
+#           application/json:
+#             schema:
+#               $ref: '#/components/schemas/OrderInput'
+#       responses:
+#         '201':
+#           description: Order created successfully
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/Order'
+
+#   /orders/{orderId}:
+#     get:
+#       summary: Get order by ID
+#       description: Returns a single order by ID
+#       operationId: getOrderById
+#       tags:
+#         - Orders
+#       parameters:
+#         - name: orderId
+#           in: path
+#           required: true
+#           schema:
+#             type: string
+#             format: uuid
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/Order'
+
+#   /analytics/stats:
+#     get:
+#       summary: Get analytics statistics
+#       description: Returns various analytics and statistics
+#       operationId: getAnalytics
+#       tags:
+#         - Analytics
+#       responses:
+#         '200':
+#           description: Successful response
+#           content:
+#             application/json:
+#               schema:
+#                 $ref: '#/components/schemas/Analytics'
+
+# # ============================================================================
+# # Reusable Components/Schemas
+# # ============================================================================
+# components:
+#   schemas:
+#     User:
+#       type: object
+#       required:
+#         - id
+#         - email
+#         - name
+#       properties:
+#         id:
+#           type: integer
+#           example: 1
+#         email:
+#           type: string
+#           format: email
+#           example: user@example.com
+#         name:
+#           type: string
+#           example: John Doe
+#         role:
+#           type: string
+#           enum: [admin, user, guest]
+#           example: user
+#         created_at:
+#           type: string
+#           format: date-time
+#         updated_at:
+#           type: string
+#           format: date-time
+#         avatar_url:
+#           type: string
+#           format: uri
+#           example: https://example.com/avatar.jpg
+#         is_active:
+#           type: boolean
+#           example: true
+
+#     UserInput:
+#       type: object
+#       required:
+#         - email
+#         - name
+#       properties:
+#         email:
+#           type: string
+#           format: email
+#         name:
+#           type: string
+#         role:
+#           type: string
+#           enum: [admin, user, guest]
+#         avatar_url:
+#           type: string
+#           format: uri
+
+#     Product:
+#       type: object
+#       required:
+#         - id
+#         - name
+#         - price
+#       properties:
+#         id:
+#           type: integer
+#           example: 101
+#         name:
+#           type: string
+#           example: Wireless Mouse
+#         description:
+#           type: string
+#           example: A high-quality wireless mouse with ergonomic design
+#         price:
+#           type: number
+#           format: float
+#           example: 29.99
+#         category:
+#           type: string
+#           example: Electronics
+#         in_stock:
+#           type: boolean
+#           example: true
+#         stock_quantity:
+#           type: integer
+#           minimum: 0
+#           example: 150
+#         tags:
+#           type: array
+#           items:
+#             type: string
+#           example: [wireless, ergonomic, tech]
+
+#     ProductInput:
+#       type: object
+#       required:
+#         - name
+#         - price
+#       properties:
+#         name:
+#           type: string
+#         description:
+#           type: string
+#         price:
+#           type: number
+#           format: float
+#         category:
+#           type: string
+#         stock_quantity:
+#           type: integer
+#         tags:
+#           type: array
+#           items:
+#             type: string
+
+#     Order:
+#       type: object
+#       required:
+#         - id
+#         - user_id
+#         - items
+#         - total
+#       properties:
+#         id:
+#           type: string
+#           format: uuid
+#           example: 550e8400-e29b-41d4-a716-446655440000
+#         user_id:
+#           type: integer
+#           example: 42
+#         items:
+#           type: array
+#           items:
+#             $ref: '#/components/schemas/OrderItem'
+#         total:
+#           type: number
+#           format: float
+#           example: 149.97
+#         status:
+#           type: string
+#           enum: [pending, processing, shipped, delivered, cancelled]
+#           example: processing
+#         created_at:
+#           type: string
+#           format: date-time
+#         shipping_address:
+#           $ref: '#/components/schemas/Address'
+
+#     OrderInput:
+#       type: object
+#       required:
+#         - items
+#       properties:
+#         items:
+#           type: array
+#           items:
+#             type: object
+#             properties:
+#               product_id:
+#                 type: integer
+#               quantity:
+#                 type: integer
+#         shipping_address:
+#           $ref: '#/components/schemas/Address'
+
+#     OrderItem:
+#       type: object
+#       properties:
+#         product_id:
+#           type: integer
+#           example: 101
+#         product_name:
+#           type: string
+#           example: Wireless Mouse
+#         quantity:
+#           type: integer
+#           minimum: 1
+#           example: 2
+#         unit_price:
+#           type: number
+#           format: float
+#           example: 29.99
+#         subtotal:
+#           type: number
+#           format: float
+#           example: 59.98
+
+#     Address:
+#       type: object
+#       properties:
+#         street:
+#           type: string
+#           example: 123 Main St
+#         city:
+#           type: string
+#           example: San Francisco
+#         state:
+#           type: string
+#           example: CA
+#         postal_code:
+#           type: string
+#           example: "94102"
+#         country:
+#           type: string
+#           example: USA
+
+#     Analytics:
+#       type: object
+#       properties:
+#         total_users:
+#           type: integer
+#           example: 1247
+#         total_orders:
+#           type: integer
+#           example: 3891
+#         total_revenue:
+#           type: number
+#           format: float
+#           example: 284729.50
+#         average_order_value:
+#           type: number
+#           format: float
+#           example: 73.19
+#         top_products:
+#           type: array
+#           items:
+#             type: object
+#             properties:
+#               product_id:
+#                 type: integer
+#               product_name:
+#                 type: string
+#               sales_count:
+#                 type: integer

@@ -222,3 +222,6 @@ __pycache__/
 dist/
 build/
 
+# Config Files
+mockapi-config.yaml
+config.yaml

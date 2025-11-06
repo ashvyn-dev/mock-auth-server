@@ -4,7 +4,7 @@ import yaml
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 class Config:
     """Configuration loader for YAML/JSON files"""
@@ -110,6 +110,33 @@ class Config:
             "http://localhost:3000/callback",
             "http://127.0.0.1:3000/callback",
         ])
+
+    # Mock API Configuration
+    @property
+    def mockapi_config_path(self) -> Path:
+        """Path to the mock API OpenAPI specification file"""
+        mockapi_config = self.config.get("mockapi", {}).get("config_file", "mockapi-config.yaml")
+        return Path(mockapi_config)
+
+    @property
+    def mockapi_enabled(self) -> bool:
+        """Check if mock API is enabled"""
+        return "mockapi" in self.enabled_flows
+
+    @property
+    def mockapi_auto_generate(self) -> bool:
+        """Whether to auto-generate fake data for responses without custom data"""
+        return self.config.get("mockapi", {}).get("auto_generate", True)
+
+    @property
+    def mockapi_prefix(self) -> str:
+        """URL prefix for mock API endpoints"""
+        return self.config.get("mockapi", {}).get("prefix", "/mockapi")
+
+    @property
+    def mockapi_faker_locale(self) -> str:
+        """Locale for Faker library (e.g., 'en_US', 'en_IN')"""
+        return self.config.get("mockapi", {}).get("faker_locale", "en_US")
 
     # Users Configuration
     @property
